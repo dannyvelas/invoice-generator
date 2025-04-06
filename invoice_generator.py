@@ -19,7 +19,6 @@ def load_config(config_path):
         # Create default config if it doesn't exist
         default_config = {
             "sender": {
-                "name": "Your Name",
                 "company": "Your Company",
                 "address": "Your Address",
                 "city": "Your City",
@@ -27,7 +26,6 @@ def load_config(config_path):
                 "email": "your.email@example.com"
             },
             "receiver": {
-                "name": "Client Name",
                 "company": "Client Company",
                 "address": "Client Address",
                 "city": "Client City"
@@ -123,8 +121,6 @@ def generate_invoice(config, invoice_date=None):
     
     # Sender details
     pdf.set_font("Arial", size=10)
-    pdf.cell(95, 5, config["sender"]["name"], 0, 0)
-    pdf.cell(95, 5, config["receiver"]["name"], 0, 1)
     pdf.cell(95, 5, config["sender"]["company"], 0, 0)
     pdf.cell(95, 5, config["receiver"]["company"], 0, 1)
     pdf.cell(95, 5, config["sender"]["address"], 0, 0)
