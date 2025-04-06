@@ -139,17 +139,17 @@ def generate_invoice(config, invoice_date=None):
 
     # calculate widths
     table_width = 210 - (margin * 2)
-    desc_width = table_width * 0.50  # 50% for description
-    qty_width = table_width * 0.15   # 15% for quantity
-    price_width = table_width * 0.15 # 15% for unit price
-    amount_width = table_width * 0.20 # 20% for amount
+    desc_width = table_width * 0.625
+    price_width = table_width * 0.15
+    qty_width = table_width * 0.10
+    amount_width = table_width * 0.125
     
     # Services table
     pdf.set_font("Arial", "B", 10)
-    pdf.cell(desc_width   , 10 , "DESCRIPTION" , 'B' , 0 , "C")
-    pdf.cell(qty_width    , 10 , "QUANTITY"    , 'B' , 0 , "C")
+    pdf.cell(desc_width   , 10 , "DESCRIPTION" , 'B' , 0 , "L")
     pdf.cell(price_width  , 10 , "UNIT PRICE"  , 'B' , 0 , "C")
-    pdf.cell(amount_width , 10 , "AMOUNT"      , 'B' , 1 , "C")
+    pdf.cell(qty_width    , 10 , "QUANTITY"    , 'B' , 0 , "C")
+    pdf.cell(amount_width , 10 , "AMOUNT"      , 'B' , 1 , "R")
 
     # position at left margin
     pdf.set_x(margin)
@@ -159,8 +159,8 @@ def generate_invoice(config, invoice_date=None):
     for service in config["services"]:
         amount = service["quantity"] * service["unit_price"]
         pdf.cell(desc_width   , 10 , service["description"]          , 0 , 0 , "L")
+        pdf.cell(price_width  , 10 , f"${service['unit_price']:.2f}" , 0 , 0 , "C")
         pdf.cell(qty_width    , 10 , str(service["quantity"])        , 0 , 0 , "C")
-        pdf.cell(price_width  , 10 , f"${service['unit_price']:.2f}" , 0 , 0 , "R")
         pdf.cell(amount_width , 10 , f"${amount:.2f}"                , 0 , 1 , "R")
         # reset for next row
         pdf.set_x(margin)
