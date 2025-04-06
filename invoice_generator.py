@@ -33,7 +33,7 @@ def load_config(config_path):
                 "city": "Client City"
             },
             "invoice": {
-                "number": "INV-001"
+                "number": "001"
             },
             "services": [
                 {
@@ -77,16 +77,15 @@ def generate_invoice(config, invoice_date=None):
     if "invoice" in config and "number" in config["invoice"]:
         invoice_number = config["invoice"]["number"]
     else:
-        invoice_number = f"INV-{invoice_date.strftime('%Y%m%d')}"
+        print("error, could not find invoice number in config file")
+        sys.exit(1)
         
     # Auto-increment invoice number for next time
-    if "invoice" in config and "number" in config["invoice"] and config["invoice"]["number"].startswith("INV-"):
-        # Extract number part and increment it
-        number_part = config["invoice"]["number"].replace("INV-", "")
+    if "invoice" in config and "number" in config["invoice"]:
         try:
             # Try to convert to integer and increment
-            new_number = int(number_part) + 1
-            config["invoice"]["number"] = f"INV-{new_number:03d}"
+            new_number = int(config["invoice"]["number"]) + 1
+            config["invoice"]["number"] = f"{new_number:03d}"
             
             # Save updated config
             with open("config.json", "w") as f:
@@ -101,7 +100,8 @@ def generate_invoice(config, invoice_date=None):
     pdf.set_font("Arial", size=12)
     
     # Set margins
-    pdf.set_margins(20, 20, 20)
+    margin = 20
+    pdf.set_margins(margin, margin, margin)
     
     # Add first line with left/center/right alignment
     pdf.set_font("Arial", "B", 16)
@@ -110,7 +110,7 @@ def generate_invoice(config, invoice_date=None):
     pdf.cell(60, 10, "INVOICE", 0, 0, "L")
     
     # Middle part - invoice number
-    pdf.cell(70, 10, f"#{invoice_number.replace('INV-', '')}", 0, 0, "C")
+    pdf.cell(70, 10, f"#{invoice_number}", 0, 0, "C")
     
     # Right part - date
     pdf.cell(60, 10, invoice_date_str, 0, 1, "R")
@@ -138,26 +138,41 @@ def generate_invoice(config, invoice_date=None):
     # Calculate total
     total_amount = sum(service["quantity"] * service["unit_price"] for service in config["services"])
     
+    # position at left margin
+    pdf.set_x(margin)
+
+    # calculate widths
+    table_width = 210 - (margin * 2)
+    desc_width = table_width * 0.50  # 50% for description
+    qty_width = table_width * 0.15   # 15% for quantity
+    price_width = table_width * 0.15 # 15% for unit price
+    amount_width = table_width * 0.20 # 20% for amount
+    
     # Services table
     pdf.set_font("Arial", "B", 10)
-    pdf.cell(95, 10, "DESCRIPTION", 1, 0, "C")
-    pdf.cell(30, 10, "QUANTITY", 1, 0, "C")
-    pdf.cell(30, 10, "UNIT PRICE", 1, 0, "C")
-    pdf.cell(35, 10, "AMOUNT", 1, 1, "C")
+    pdf.cell(desc_width   , 10 , "DESCRIPTION" , 'B' , 0 , "C")
+    pdf.cell(qty_width    , 10 , "QUANTITY"    , 'B' , 0 , "C")
+    pdf.cell(price_width  , 10 , "UNIT PRICE"  , 'B' , 0 , "C")
+    pdf.cell(amount_width , 10 , "AMOUNT"      , 'B' , 1 , "C")
+
+    # position at left margin
+    pdf.set_x(margin)
     
     # Data rows
     pdf.set_font("Arial", size=10)
     for service in config["services"]:
         amount = service["quantity"] * service["unit_price"]
-        pdf.cell(95, 10, service["description"], 1, 0, "L")
-        pdf.cell(30, 10, str(service["quantity"]), 1, 0, "C")
-        pdf.cell(30, 10, f"${service['unit_price']:.2f}", 1, 0, "R")
-        pdf.cell(35, 10, f"${amount:.2f}", 1, 1, "R")
+        pdf.cell(desc_width   , 10 , service["description"]          , 0 , 0 , "L")
+        pdf.cell(qty_width    , 10 , str(service["quantity"])        , 0 , 0 , "C")
+        pdf.cell(price_width  , 10 , f"${service['unit_price']:.2f}" , 0 , 0 , "R")
+        pdf.cell(amount_width , 10 , f"${amount:.2f}"                , 0 , 1 , "R")
+        # reset for next row
+        pdf.set_x(margin)
     
     # Total row
     pdf.set_font("Arial", "B", 10)
-    pdf.cell(155, 10, "TOTAL", 1, 0, "R")
-    pdf.cell(35, 10, f"${total_amount:.2f}", 1, 1, "R")
+    pdf.cell(desc_width + qty_width + price_width, 10, "TOTAL", "T", 0, "L")
+    pdf.cell(amount_width, 10, f"${total_amount:.2f}", "T", 1, "R")
     
     # Add note
     pdf.ln(10)
