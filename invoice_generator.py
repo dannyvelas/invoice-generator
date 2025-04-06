@@ -238,7 +238,7 @@ def main():
     invoice_path, invoice_date, _ = generate_invoice(config, invoice_date)
     
     # Generate email
-    #email_path = generate_email(config, invoice_path, invoice_date)
+    email_path = generate_email(config, invoice_path, invoice_date)
     
     print("\nInvoice generation complete!")
     print(f"Invoice: {invoice_path}")
