@@ -14,8 +14,8 @@ A simple tool to automate the creation of PDF invoices and email drafts.
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/lv-pdf-generator.git
-   cd lv-pdf-generator
+   git clone https://github.com/yourusername/invoice-generator.git
+   cd invoice-generator
    ```
 
 2. Install the required dependencies:
